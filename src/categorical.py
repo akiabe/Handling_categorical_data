@@ -88,8 +88,10 @@ class CategoricalFeatures:
 
 if __name__ == "__main__":
     import pandas as pd
+    from sklearn import linear_model
     df = pd.read_csv("../input/train_cat.csv")#.head(500)
     df_test = pd.read_csv("../input/test.csv")#.head(500)
+    sample = pd.read_csv("../input/sample_submission.csv")
 
     #train_idx = df["id"].values
     #test_idx = df_test["id"].values
@@ -111,9 +113,15 @@ if __name__ == "__main__":
     #train_df = full_data_transformd[full_data_transformd["id"].isin(train_idx)].reset_index(drop=True)
     #test_df = full_data_transformd[full_data_transformd["id"].isin(test_idx)].reset_index(drop=True)
 
-    train_df = full_data_transformd[:train_len, :]
-    test_df = full_data_transformd[train_len:, :]
+    X = full_data_transformd[:train_len, :]
+    X_test = full_data_transformd[train_len:, :]
+    #print(train_df.shape)
+    #print(test_df.shape)
 
-    print(train_df.shape)
-    print(test_df.shape)
+    clf = linear_model.LogisticRegression()
+    clf.fit(X, df.target.values)
+    preds = clf.predict_proba(X_test)[:, 1]
+
+    sample.loc[:, "target"] = preds
+    sample.to_csv("submission.csv", index=False)
 
